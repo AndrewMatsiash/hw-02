@@ -4,11 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
     "watch": "tsc -w",
     "dev": "nodemon --exec 'node --env-file=.env' dist/index.js",
     "jest": "jest -i",
     "lint": "eslint --fix .",
     "format": "prettier --write ."
+  },
+  "engines": {
+    "node": ">=20"
   },
   "keywords": [],
   "author": "",

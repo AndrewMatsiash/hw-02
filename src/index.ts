@@ -4,8 +4,8 @@ import { bootstrap } from "./bootstrap";
 const app = express();
 bootstrap(app);
 
-const PORT = process.env.PORT || 5001;
+const PORT = Number(process.env.PORT || 5001);
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`App listening on port ${PORT}`);
 });
