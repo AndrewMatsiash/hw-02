@@ -5,14 +5,15 @@ import { BlogInputModel } from "./dto/blog.input.dto";
 import { BlogViewModel } from "./types/blog.types";
 
 export const blogsController = {
-  getAll: (_: Request, res: Response) => {
-    const blogs = blogsService.getAll();
+  getAll: async (_: Request, res: Response) => {
+    const blogs = await blogsService.getAll();
     return res.status(HTTP_STATUSES.OK).send(blogs);
   },
-  getById: (req: Request<{ id: string }>, res: Response) => {
+
+  getById: async (req: Request<{ id: string }>, res: Response) => {
     const blogId = req.params.id;
 
-    const blog = blogsService.getById(blogId);
+    const blog = await blogsService.getById(blogId);
 
     if (!blog) {
       return res.sendStatus(HTTP_STATUSES.NOT_FOUND);
@@ -20,17 +21,16 @@ export const blogsController = {
 
     return res.status(HTTP_STATUSES.OK).send(blog);
   },
-  create: (req: Request<{}, BlogViewModel, BlogInputModel>, res: Response) => {
-    const newBlog = blogsService.create(req.body);
+
+  create: async (req: Request<{}, BlogViewModel, BlogInputModel>, res: Response) => {
+    const newBlog = await blogsService.create(req.body);
     return res.status(HTTP_STATUSES.CREATED).send(newBlog);
   },
-  update: (
-    req: Request<{ id: string }, void, BlogInputModel>,
-    res: Response,
-  ) => {
+
+  update: async (req: Request<{ id: string }, void, BlogInputModel>, res: Response) => {
     const id = req.params.id;
 
-    const updatedBlog = blogsService.update(id, req.body);
+    const updatedBlog = await blogsService.update(id, req.body);
 
     if (!updatedBlog) {
       return res.sendStatus(HTTP_STATUSES.NOT_FOUND);
@@ -38,10 +38,11 @@ export const blogsController = {
 
     return res.sendStatus(HTTP_STATUSES.NO_CONTENT);
   },
-  remove: (req: Request<{ id: string }, void, void>, res: Response) => {
+
+  remove: async (req: Request<{ id: string }, void, void>, res: Response) => {
     const id = req.params.id;
 
-    const deletedBlog = blogsService.remove(id);
+    const deletedBlog = await blogsService.remove(id);
 
     if (!deletedBlog) {
       return res.sendStatus(HTTP_STATUSES.NOT_FOUND);

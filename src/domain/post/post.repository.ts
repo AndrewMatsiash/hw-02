@@ -1,79 +1,72 @@
-import { db } from "../../db/db";
+import { collections } from "../../db/collection";
 import { PostInputModel } from "./dto/post.input.dto";
-import { PostViewModel } from "./types/post.types";
 
 export const postsRepository = {
-  getAll: (): PostViewModel[] => db.posts.map((post) => ({ ...post })),
-  getById: (id: string): PostViewModel | undefined => {
-    const post = db.posts.find((post) => post.id === id);
-    return post && { ...post };
-  },
-  create: ({
-    body,
-    blogName,
-  }: {
-    body: PostInputModel;
-    blogName: string;
-  }): PostViewModel => {
+  getAll: async () => collections.posts.find({}).toArray(),
+
+  getById: async (id: string) => await collections.posts.findOne({ id }),
+
+  create: async ({ body, blogName }: { body: PostInputModel; blogName: string }) => {
     const { title, shortDescription, content, blogId } = body;
 
-    const newPost = {
-      id: String(++db.lastPostId),
+    const newPost = await collections.posts.insertOne({
+      id: crypto.randomUUID(),
       title,
       shortDescription,
       content,
       blogId,
       blogName,
-    };
+    });
 
-    db.posts.push(newPost);
-
-    return { ...newPost };
+    return newPost;
   },
-  update: ({
-    id,
-    body,
-    blogName,
-  }: {
-    id: string;
-    body: PostInputModel;
-    blogName: string;
-  }): PostViewModel | undefined => {
-    const index = db.posts.findIndex((post) => post.id === id);
 
-    if (index === -1) return undefined;
-
+  update: async ({ id, body, blogName }: { id: string; body: PostInputModel; blogName: string }) => {
     const { title, shortDescription, content, blogId } = body;
 
-    const updatedPost: PostViewModel = {
-      ...db.posts[index],
-      title,
-      shortDescription,
-      content,
-      blogId,
-      blogName,
-    };
-    db.posts[index] = updatedPost;
-    return { ...updatedPost };
-  },
-  remove: (id: string): PostViewModel | undefined => {
-    const index = db.posts.findIndex((post) => post.id === id);
+    const newPost = await collections.posts.findOneAndUpdate(
+      { id },
+      {
+        $set: {
+          title,
+          shortDescription,
+          content,
+          blogId,
+          blogName,
+        },
+      },
+      { returnDocument: "after", projection: { _id: 0 } },
+    );
 
-    if (index === -1) return undefined;
+    if (!newPost) return null;
 
-    const deleted = db.posts.splice(index, 1)[0];
-    return { ...deleted };
+    return newPost;
   },
-  updateBlogName: (blogId: string, blogName: string): void => {
-    db.posts = db.posts.map((post) =>
-      post.blogId === blogId ? { ...post, blogName } : post,
+
+  remove: async (id: string) => {
+    const deletedPost = await collections.posts.deleteOne({ id });
+
+    if (!deletedPost) return null;
+
+    return deletedPost;
+  },
+
+  updateBlogName: (blogId: string, blogName: string) => {
+    collections.posts.findOneAndUpdate(
+      { id: blogId },
+      {
+        $set: {
+          blogName,
+        },
+      },
     );
   },
-  removeByBlogId: (blogId: string): void => {
-    db.posts = db.posts.filter((post) => post.blogId !== blogId);
+
+  removeByBlogId: async (blogId: string) => {
+    await collections.posts.deleteMany({ blogId });
   },
-  clearAll: (): void => {
-    db.posts = [];
-    db.lastPostId = 0;
+
+  clearAll: async () => {
+    await collections.posts.deleteMany({});
   },
 };

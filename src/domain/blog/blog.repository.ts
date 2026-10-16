@@ -1,49 +1,55 @@
-import { db } from "../../db/db";
+import { collections } from "../../db/collection";
 import { BlogInputModel } from "./dto/blog.input.dto";
 import { BlogViewModel } from "./types/blog.types";
 
 export const blogsRepository = {
-  getAll: (): BlogViewModel[] => db.blogs.map((blog) => ({ ...blog })),
-  getById: (id: string): BlogViewModel | undefined => {
-    const blog = db.blogs.find((blog) => blog.id === id);
-    return blog && { ...blog };
+  getAll: async () => collections.blogs.find({}, { projection: { _id: 0 } }).toArray(),
+
+  getById: async (id: string) => {
+    return collections.blogs.findOne({ id });
   },
-  create: (body: BlogInputModel): BlogViewModel => {
+
+  create: async (body: BlogInputModel) => {
     const dbBlogRecord: BlogViewModel = {
-      id: String(++db.lastBlogId),
+      id: crypto.randomUUID(),
       name: body.name,
       description: body.description,
       websiteUrl: body.websiteUrl,
     };
-    db.blogs.push(dbBlogRecord);
+
+    await collections.blogs.insertOne(dbBlogRecord);
     return { ...dbBlogRecord };
   },
-  update: (id: string, data: BlogInputModel): BlogViewModel | undefined => {
-    const index = db.blogs.findIndex((blog) => blog.id === id);
 
-    if (index === -1) return undefined;
+  update: async (id: string, data: BlogInputModel) => {
+    const result = await collections.blogs.findOneAndUpdate(
+      { id },
+      {
+        $set: {
+          name: data.name,
+          description: data.description,
+          websiteUrl: data.websiteUrl,
+        },
+      },
+      {
+        returnDocument: "after",
+        projection: { _id: 0 },
+      },
+    );
 
-    const { name, description, websiteUrl } = data;
-
-    const updatedBlog: BlogViewModel = {
-      ...db.blogs[index],
-      name,
-      description,
-      websiteUrl,
-    };
-    db.blogs[index] = updatedBlog;
-    return { ...updatedBlog };
+    return result;
   },
-  remove: (id: string): BlogViewModel | undefined => {
-    const index = db.blogs.findIndex((blog) => blog.id === id);
 
-    if (index === -1) return undefined;
+  remove: async (id: string) => {
+    const existing = await collections.blogs.findOne({ id }, { projection: { _id: 0 } });
 
-    const deleted = db.blogs.splice(index, 1)[0];
-    return { ...deleted };
+    if (!existing) return null;
+
+    await collections.blogs.deleteOne({ id });
+    return existing;
   },
-  clearAll: () => {
-    db.blogs = [];
-    db.lastBlogId = 0;
+
+  clearAll: async () => {
+    await collections.blogs.deleteMany({});
   },
 };

@@ -4,30 +4,33 @@ import { BlogInputModel } from "./dto/blog.input.dto";
 import { BlogViewModel } from "./types/blog.types";
 
 export const blogsService = {
-  getAll: (): BlogViewModel[] => {
-    const blogs = blogsRepository.getAll();
+  getAll: async () => {
+    const blogs = await blogsRepository.getAll();
     return blogs;
   },
-  getById: (id: string): BlogViewModel | undefined => {
-    const blog = blogsRepository.getById(id);
+
+  getById: async (id: string) => {
+    const blog = await blogsRepository.getById(id);
     return blog;
   },
-  create: (body: BlogInputModel): BlogViewModel => {
-    const newBlog = blogsRepository.create(body);
+
+  create: async (body: BlogInputModel) => {
+    const newBlog = await blogsRepository.create(body);
     return newBlog;
   },
-  update: (id: string, body: BlogInputModel): BlogViewModel | undefined => {
-    const updatedBlog = blogsRepository.update(id, body);
 
-    // posts store a copy of blogName, so keep it in sync on rename
+  update: async (id: string, body: BlogInputModel) => {
+    const updatedBlog = await blogsRepository.update(id, body);
+
     if (updatedBlog) {
       postsRepository.updateBlogName(updatedBlog.id, updatedBlog.name);
     }
 
     return updatedBlog;
   },
-  remove: (id: string): BlogViewModel | undefined => {
-    const deletedBlog = blogsRepository.remove(id);
+
+  remove: async (id: string) => {
+    const deletedBlog = await blogsRepository.remove(id);
 
     // a post can't exist without its blog
     if (deletedBlog) {

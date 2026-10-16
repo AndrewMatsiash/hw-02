@@ -5,14 +5,15 @@ import { postsService } from "./post.service";
 import { PostViewModel } from "./types/post.types";
 
 export const postsController = {
-  getAll: (_: Request, res: Response) => {
-    const posts = postsService.getAll();
+  getAll: async (_: Request, res: Response) => {
+    const posts = await postsService.getAll();
     return res.status(HTTP_STATUSES.OK).send(posts);
   },
-  getById: (req: Request<{ id: string }>, res: Response) => {
+
+  getById: async (req: Request<{ id: string }>, res: Response) => {
     const id = req.params.id;
 
-    const post = postsService.getById(id);
+    const post = await postsService.getById(id);
 
     if (!post) {
       return res.sendStatus(HTTP_STATUSES.NOT_FOUND);
@@ -20,29 +21,33 @@ export const postsController = {
 
     return res.status(HTTP_STATUSES.OK).send(post);
   },
-  create: (req: Request<{}, PostViewModel, PostInputModel>, res: Response) => {
+
+  create: async (req: Request<{}, PostViewModel, PostInputModel>, res: Response) => {
     const body = req.body;
-    const newPost = postsService.create(body);
+    const newPost = await postsService.create(body);
+
+    if (!newPost) {
+      return res.sendStatus(HTTP_STATUSES.BAD_REQUEST);
+    }
     return res.status(HTTP_STATUSES.CREATED).send(newPost);
   },
-  update: (
-    req: Request<{ id: string }, PostViewModel, PostInputModel>,
-    res: Response,
-  ) => {
+
+  update: async (req: Request<{ id: string }, PostViewModel, PostInputModel>, res: Response) => {
     const id = req.params.id;
     const body = req.body;
 
-    const updatedPost = postsService.update(id, body);
+    const updatedPost = await postsService.update(id, body);
 
     if (!updatedPost) {
       return res.sendStatus(HTTP_STATUSES.NOT_FOUND);
     }
     return res.sendStatus(HTTP_STATUSES.NO_CONTENT);
   },
-  remove: (req: Request<{ id: string }, void, void>, res: Response) => {
+
+  remove: async (req: Request<{ id: string }, void, void>, res: Response) => {
     const id = req.params.id;
 
-    const deletedPost = postsService.remove(id);
+    const deletedPost = await postsService.remove(id);
 
     if (!deletedPost) {
       return res.sendStatus(HTTP_STATUSES.NOT_FOUND);

@@ -10,4 +10,6 @@ export const SETTINGS = {
     username: required("ADMIN_USERNAME"),
     password: required("ADMIN_PASSWORD"),
   },
+  DB_NAME: process.env.DB_NAME || "ed-back-lessons-uber",
+  DB_URL: required("DB_URL"),
 } as const;

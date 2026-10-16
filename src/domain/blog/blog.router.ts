@@ -10,18 +10,6 @@ export const blogsRouter = Router();
 blogsRouter
   .get("/", blogsController.getAll)
   .get("/:id", blogsController.getById)
-  .post(
-    "/",
-    basicAuthGuard,
-    createBlogValidation,
-    inputValidationResultMiddleware,
-    blogsController.create,
-  )
-  .put(
-    "/:id",
-    basicAuthGuard,
-    updateBlogValidation,
-    inputValidationResultMiddleware,
-    blogsController.update,
-  )
+  .post("/", basicAuthGuard, createBlogValidation, inputValidationResultMiddleware, blogsController.create)
+  .put("/:id", basicAuthGuard, updateBlogValidation, inputValidationResultMiddleware, blogsController.update)
   .delete("/:id", basicAuthGuard, blogsController.remove);
