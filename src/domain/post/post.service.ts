@@ -1,53 +1,41 @@
 import { blogsService } from "../blog/blog.service";
 import { PostInputModel } from "./dto/post.input.dto";
 import { postsRepository } from "./post.repository";
-import { PostViewModel } from "./types/post.types";
 
 export const postsService = {
   getAll: async () => {
-    const posts = await postsRepository.getAll();
-    return posts;
+    return postsRepository.getAll();
   },
 
   getById: async (id: string) => {
-    const post = await postsRepository.getById(id);
-    return post;
+    return postsRepository.getById(id);
   },
 
   create: async (body: PostInputModel) => {
-    const { blogId } = body;
-
-    const postBlog = await blogsService.getById(blogId);
+    const postBlog = await blogsService.getById(body.blogId);
 
     if (!postBlog) {
-      throw new Error(`Blog ${blogId} not found`);
+      return null;
     }
 
-    const newPost = await postsRepository.create({ body, blogName: postBlog.name });
-
-    return newPost;
+    return postsRepository.create({ body, blogName: postBlog.name });
   },
 
   update: async (id: string, body: PostInputModel) => {
-    const { blogId } = body;
-
-    const blog = await blogsService.getById(blogId);
+    const blog = await blogsService.getById(body.blogId);
 
     if (!blog) {
-      throw new Error(`Blog with id: ${blogId} not found`);
+      return null;
     }
 
-    const updatedPost = await postsRepository.update({
+    return postsRepository.update({
       id,
       body,
       blogName: blog.name,
     });
-
-    return updatedPost;
   },
 
   remove: async (id: string) => {
-    const deletedPost = await postsRepository.remove(id);
-    return deletedPost;
+    return postsRepository.remove(id);
   },
 };

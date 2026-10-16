@@ -6,7 +6,7 @@ export const blogsRepository = {
   getAll: async () => collections.blogs.find({}, { projection: { _id: 0 } }).toArray(),
 
   getById: async (id: string) => {
-    return collections.blogs.findOne({ id });
+    return collections.blogs.findOne({ id }, { projection: { _id: 0 } });
   },
 
   create: async (body: BlogInputModel) => {

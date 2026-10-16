@@ -34,8 +34,9 @@ export const blogIdValidation = body("blogId")
   .isString()
   .withMessage("blogId must be a string")
   .trim()
-  .custom((blogId: string) => {
-    if (!blogsRepository.getById(blogId)) {
+  .custom(async (blogId: string) => {
+    const blog = await blogsRepository.getById(blogId);
+    if (!blog) {
       throw new Error("Blog not found");
     }
     return true;

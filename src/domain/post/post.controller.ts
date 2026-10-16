@@ -29,6 +29,7 @@ export const postsController = {
     if (!newPost) {
       return res.sendStatus(HTTP_STATUSES.BAD_REQUEST);
     }
+
     return res.status(HTTP_STATUSES.CREATED).send(newPost);
   },
 

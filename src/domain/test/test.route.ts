@@ -5,8 +5,8 @@ import { postsRepository } from "../post/post.repository";
 
 export const testRouter = Router({});
 
-testRouter.delete(`/all-data`, (_: Request, res: Response) => {
-  blogsRepository.clearAll();
-  postsRepository.clearAll();
+testRouter.delete(`/all-data`, async (_: Request, res: Response) => {
+  await blogsRepository.clearAll();
+  await postsRepository.clearAll();
   return res.sendStatus(HTTP_STATUSES.NO_CONTENT);
 });

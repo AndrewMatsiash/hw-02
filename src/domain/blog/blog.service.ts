@@ -1,7 +1,6 @@
 import { postsRepository } from "../post/post.repository";
 import { blogsRepository } from "./blog.repository";
 import { BlogInputModel } from "./dto/blog.input.dto";
-import { BlogViewModel } from "./types/blog.types";
 
 export const blogsService = {
   getAll: async () => {
@@ -23,7 +22,7 @@ export const blogsService = {
     const updatedBlog = await blogsRepository.update(id, body);
 
     if (updatedBlog) {
-      postsRepository.updateBlogName(updatedBlog.id, updatedBlog.name);
+      await postsRepository.updateBlogName(updatedBlog.id, updatedBlog.name);
     }
 
     return updatedBlog;
@@ -34,7 +33,7 @@ export const blogsService = {
 
     // a post can't exist without its blog
     if (deletedBlog) {
-      postsRepository.removeByBlogId(deletedBlog.id);
+      await postsRepository.removeByBlogId(deletedBlog.id);
     }
 
     return deletedBlog;
