@@ -1,11 +1,16 @@
-import { Router } from "express";
-import { blogsRouter } from "./domain/blog/blog.router";
-import { postsRouter } from "./domain/post/post.router";
-import { testRouter } from "./domain/test/test.route";
+import { Router, type Router as RouterType } from "express";
 import { ROUTES } from "./shared/routes";
 
-export const apiRouter = Router();
+export const createApiRouter = (
+  blogsRouter: RouterType,
+  postsRouter: RouterType,
+  testRouter: RouterType,
+) => {
+  const apiRouter = Router();
 
-apiRouter.use(ROUTES.blogs, blogsRouter);
-apiRouter.use(ROUTES.posts, postsRouter);
-apiRouter.use(ROUTES.testing, testRouter);
+  apiRouter.use(ROUTES.blogs, blogsRouter);
+  apiRouter.use(ROUTES.posts, postsRouter);
+  apiRouter.use(ROUTES.testing, testRouter);
+
+  return apiRouter;
+};

@@ -1,15 +1,19 @@
-import { collections } from "../../db/collection";
+import { Collection } from "mongodb";
 import { PostInputModel } from "./dto/post.input.dto";
 import { PostViewModel } from "./types/post.types";
 
-export const postsRepository = {
-  getAll: async () => collections.posts.find({}, { projection: { _id: 0 } }).toArray(),
+export class PostsRepository {
+  constructor(private readonly posts: Collection<PostViewModel>) {}
 
-  getById: async (id: string) => {
-    return collections.posts.findOne({ id }, { projection: { _id: 0 } });
-  },
+  getAll() {
+    return this.posts.find({}, { projection: { _id: 0 } }).toArray();
+  }
 
-  create: async ({ body, blogName }: { body: PostInputModel; blogName: string }) => {
+  async getById(id: string) {
+    return this.posts.findOne({ id }, { projection: { _id: 0 } });
+  }
+
+  async create({ body, blogName }: { body: PostInputModel; blogName: string }) {
     const { title, shortDescription, content, blogId } = body;
 
     const newPost: PostViewModel = {
@@ -21,11 +25,11 @@ export const postsRepository = {
       blogName,
     };
 
-    await collections.posts.insertOne(newPost);
+    await this.posts.insertOne(newPost);
     return newPost;
-  },
+  }
 
-  update: async ({
+  async update({
     id,
     body,
     blogName,
@@ -33,10 +37,10 @@ export const postsRepository = {
     id: string;
     body: PostInputModel;
     blogName: string;
-  }) => {
+  }) {
     const { title, shortDescription, content, blogId } = body;
 
-    const updatedPost = await collections.posts.findOneAndUpdate(
+    const updatedPost = await this.posts.findOneAndUpdate(
       { id },
       {
         $set: {
@@ -51,26 +55,26 @@ export const postsRepository = {
     );
 
     return updatedPost;
-  },
+  }
 
-  remove: async (id: string) => {
-    const existing = await collections.posts.findOne({ id }, { projection: { _id: 0 } });
+  async remove(id: string) {
+    const existing = await this.posts.findOne({ id }, { projection: { _id: 0 } });
 
     if (!existing) return null;
 
-    await collections.posts.deleteOne({ id });
+    await this.posts.deleteOne({ id });
     return existing;
-  },
+  }
 
-  updateBlogName: async (blogId: string, blogName: string) => {
-    await collections.posts.updateMany({ blogId }, { $set: { blogName } });
-  },
+  async updateBlogName(blogId: string, blogName: string) {
+    await this.posts.updateMany({ blogId }, { $set: { blogName } });
+  }
 
-  removeByBlogId: async (blogId: string) => {
-    await collections.posts.deleteMany({ blogId });
-  },
+  async removeByBlogId(blogId: string) {
+    await this.posts.deleteMany({ blogId });
+  }
 
-  clearAll: async () => {
-    await collections.posts.deleteMany({});
-  },
-};
+  async clearAll() {
+    await this.posts.deleteMany({});
+  }
+}

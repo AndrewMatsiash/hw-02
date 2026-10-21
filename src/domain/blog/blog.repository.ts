@@ -1,15 +1,19 @@
-import { collections } from "../../db/collection";
+import { Collection } from "mongodb";
 import { BlogInputModel } from "./dto/blog.input.dto";
 import { BlogViewModel } from "./types/blog.types";
 
-export const blogsRepository = {
-  getAll: async () => collections.blogs.find({}, { projection: { _id: 0 } }).toArray(),
+export class BlogsRepository {
+  constructor(private readonly blogs: Collection<BlogViewModel>) {}
 
-  getById: async (id: string) => {
-    return collections.blogs.findOne({ id }, { projection: { _id: 0 } });
-  },
+  getAll() {
+    return this.blogs.find({}, { projection: { _id: 0 } }).toArray();
+  }
 
-  create: async (body: BlogInputModel) => {
+  async getById(id: string) {
+    return this.blogs.findOne({ id }, { projection: { _id: 0 } });
+  }
+
+  async create(body: BlogInputModel) {
     const dbBlogRecord: BlogViewModel = {
       id: crypto.randomUUID(),
       name: body.name,
@@ -17,12 +21,12 @@ export const blogsRepository = {
       websiteUrl: body.websiteUrl,
     };
 
-    await collections.blogs.insertOne(dbBlogRecord);
+    await this.blogs.insertOne(dbBlogRecord);
     return { ...dbBlogRecord };
-  },
+  }
 
-  update: async (id: string, data: BlogInputModel) => {
-    const result = await collections.blogs.findOneAndUpdate(
+  async update(id: string, data: BlogInputModel) {
+    const result = await this.blogs.findOneAndUpdate(
       { id },
       {
         $set: {
@@ -38,18 +42,21 @@ export const blogsRepository = {
     );
 
     return result;
-  },
+  }
 
-  remove: async (id: string) => {
-    const existing = await collections.blogs.findOne({ id }, { projection: { _id: 0 } });
+  async remove(id: string) {
+    const existing = await this.blogs.findOne(
+      { id },
+      { projection: { _id: 0 } },
+    );
 
     if (!existing) return null;
 
-    await collections.blogs.deleteOne({ id });
+    await this.blogs.deleteOne({ id });
     return existing;
-  },
+  }
 
-  clearAll: async () => {
-    await collections.blogs.deleteMany({});
-  },
-};
+  async clearAll() {
+    await this.blogs.deleteMany({});
+  }
+}

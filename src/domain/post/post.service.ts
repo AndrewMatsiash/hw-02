@@ -1,41 +1,46 @@
-import { blogsService } from "../blog/blog.service";
+import { BlogsService } from "../blog/blog.service";
 import { PostInputModel } from "./dto/post.input.dto";
-import { postsRepository } from "./post.repository";
+import { PostsRepository } from "./post.repository";
 
-export const postsService = {
-  getAll: async () => {
-    return postsRepository.getAll();
-  },
+export class PostsService {
+  constructor(
+    private readonly postsRepository: PostsRepository,
+    private readonly blogsService: BlogsService,
+  ) {}
 
-  getById: async (id: string) => {
-    return postsRepository.getById(id);
-  },
+  async getAll() {
+    return this.postsRepository.getAll();
+  }
 
-  create: async (body: PostInputModel) => {
-    const postBlog = await blogsService.getById(body.blogId);
+  async getById(id: string) {
+    return this.postsRepository.getById(id);
+  }
+
+  async create(body: PostInputModel) {
+    const postBlog = await this.blogsService.getById(body.blogId);
 
     if (!postBlog) {
       return null;
     }
 
-    return postsRepository.create({ body, blogName: postBlog.name });
-  },
+    return this.postsRepository.create({ body, blogName: postBlog.name });
+  }
 
-  update: async (id: string, body: PostInputModel) => {
-    const blog = await blogsService.getById(body.blogId);
+  async update(id: string, body: PostInputModel) {
+    const blog = await this.blogsService.getById(body.blogId);
 
     if (!blog) {
       return null;
     }
 
-    return postsRepository.update({
+    return this.postsRepository.update({
       id,
       body,
       blogName: blog.name,
     });
-  },
+  }
 
-  remove: async (id: string) => {
-    return postsRepository.remove(id);
-  },
-};
+  async remove(id: string) {
+    return this.postsRepository.remove(id);
+  }
+}

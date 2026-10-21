@@ -1,13 +1,14 @@
+import { BlogsRepository } from "../../blog/blog.repository";
 import {
-  blogIdValidation,
+  createBlogIdValidation,
   contentValidation,
   shortDescriptionValidation,
   titleValidation,
 } from "./post-input.validator";
 
-export const updatePostValidation = [
+export const createUpdatePostValidation = (blogsRepository: BlogsRepository) => [
   titleValidation,
   shortDescriptionValidation,
   contentValidation,
-  blogIdValidation,
+  createBlogIdValidation(blogsRepository),
 ];

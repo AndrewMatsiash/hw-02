@@ -1,18 +1,7 @@
 import { HTTP_STATUSES } from "../../../core/http/http-statuses";
 import { ROUTES } from "../../../shared/routes";
-import {
-  api,
-  BAD_AUTH_HEADERS,
-  fieldErrors,
-  resetDb,
-  UNKNOWN_ID,
-  withAuth,
-} from "../../../__tests__/utils";
-import {
-  blogUrl,
-  createBlog,
-  validBlogInput,
-} from "../../blog/__tests__/blog.helpers";
+import { api, BAD_AUTH_HEADERS, fieldErrors, resetDb, UNKNOWN_ID, withAuth } from "../../../__tests__/utils";
+import { blogUrl, createBlog, validBlogInput } from "../../blog/__tests__/blog.helpers";
 import { BlogViewModel } from "../../blog/types/blog.types";
 import { PostInputModel } from "../dto/post.input.dto";
 import { PostViewModel } from "../types/post.types";
@@ -21,10 +10,8 @@ const POSTS_URL = `${ROUTES.base}${ROUTES.posts}`;
 const postUrl = (id: string) => `${POSTS_URL}/${id}`;
 
 const createPost = (input: object) => withAuth(api.post(POSTS_URL)).send(input);
-const updatePost = (id: string, input: object) =>
-  withAuth(api.put(postUrl(id))).send(input);
-const getPosts = async (): Promise<PostViewModel[]> =>
-  (await api.get(POSTS_URL)).body;
+const updatePost = (id: string, input: object) => withAuth(api.put(postUrl(id))).send(input);
+const getPosts = async () => (await api.get(POSTS_URL)).body;
 
 describe("/posts", () => {
   let blog: BlogViewModel;
@@ -112,8 +99,7 @@ describe("/posts", () => {
     });
 
     it("recalculates blogName when blogId changes", async () => {
-      const otherBlog = (await createBlog({ ...validBlogInput, name: "Other" }))
-        .body;
+      const otherBlog = (await createBlog({ ...validBlogInput, name: "Other" })).body;
       await updatePost(post.id, { ...validInput, blogId: otherBlog.id });
       const updated = (await api.get(postUrl(post.id))).body;
       expect(updated).toMatchObject({
@@ -132,23 +118,18 @@ describe("/posts", () => {
       expect(await getPosts()).toEqual([post]);
     });
 
-    it.each([UNKNOWN_ID, "abc"])(
-      "returns 404 for unknown id %p",
-      async (id) => {
-        await updatePost(id, validInput).expect(HTTP_STATUSES.NOT_FOUND);
-        expect(await getPosts()).toEqual([post]);
-      },
-    );
+    it.each([UNKNOWN_ID, "abc"])("returns 404 for unknown id %p", async (id) => {
+      await updatePost(id, validInput).expect(HTTP_STATUSES.NOT_FOUND);
+      expect(await getPosts()).toEqual([post]);
+    });
   });
 
   describe("when its blog changes", () => {
     let otherPost: PostViewModel;
 
     beforeEach(async () => {
-      const otherBlog = (await createBlog({ ...validBlogInput, name: "Other" }))
-        .body;
-      otherPost = (await createPost({ ...validInput, blogId: otherBlog.id }))
-        .body;
+      const otherBlog = (await createBlog({ ...validBlogInput, name: "Other" })).body;
+      otherPost = (await createPost({ ...validInput, blogId: otherBlog.id })).body;
     });
 
     it("keeps blogName in sync when the blog is renamed", async () => {
@@ -156,16 +137,11 @@ describe("/posts", () => {
         .send({ ...validBlogInput, name: "Renamed" })
         .expect(HTTP_STATUSES.NO_CONTENT);
 
-      expect(await getPosts()).toEqual([
-        { ...post, blogName: "Renamed" },
-        otherPost,
-      ]);
+      expect(await getPosts()).toEqual([{ ...post, blogName: "Renamed" }, otherPost]);
     });
 
     it("removes its posts when the blog is deleted", async () => {
-      await withAuth(api.delete(blogUrl(blog.id))).expect(
-        HTTP_STATUSES.NO_CONTENT,
-      );
+      await withAuth(api.delete(blogUrl(blog.id))).expect(HTTP_STATUSES.NO_CONTENT);
 
       expect(await getPosts()).toEqual([otherPost]);
     });
@@ -192,18 +168,14 @@ describe("/posts", () => {
       ["blogId", ""],
       ["blogId", UNKNOWN_ID],
     ])("returns 400 for invalid %s (case %#)", async (field, value) => {
-      const res = await send({ ...validInput, [field]: value }).expect(
-        HTTP_STATUSES.BAD_REQUEST,
-      );
+      const res = await send({ ...validInput, [field]: value }).expect(HTTP_STATUSES.BAD_REQUEST);
       expect(res.body).toEqual(fieldErrors(field));
       expect(await getPosts()).toEqual([post]);
     });
 
     it("returns one error per invalid field", async () => {
       const res = await send({}).expect(HTTP_STATUSES.BAD_REQUEST);
-      expect(res.body).toEqual(
-        fieldErrors("title", "shortDescription", "content", "blogId"),
-      );
+      expect(res.body).toEqual(fieldErrors("title", "shortDescription", "content", "blogId"));
     });
   });
 
@@ -213,9 +185,7 @@ describe("/posts", () => {
   ])("%s authorization", (_, makeRequest) => {
     it.each(BAD_AUTH_HEADERS)("returns 401 with %s", async (_, header) => {
       const test = makeRequest();
-      await (header ? test.set("Authorization", header) : test).expect(
-        HTTP_STATUSES.UNAUTHORIZED,
-      );
+      await (header ? test.set("Authorization", header) : test).expect(HTTP_STATUSES.UNAUTHORIZED);
       expect(await getPosts()).toEqual([post]);
     });
   });

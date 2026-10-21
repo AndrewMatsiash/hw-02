@@ -1,11 +1,14 @@
-import express from "express";
 import request from "supertest";
-import { bootstrap } from "../bootstrap";
 import { HTTP_STATUSES } from "../core/http/http-statuses";
 import { SETTINGS } from "../settings/config";
 import { ROUTES } from "../shared/routes";
+import { getTestApp } from "../testing/test-app";
 
-export const api = request(bootstrap(express()));
+export let api: ReturnType<typeof request>;
+
+beforeAll(() => {
+  api = request(getTestApp());
+});
 
 export const UNKNOWN_ID = "999";
 

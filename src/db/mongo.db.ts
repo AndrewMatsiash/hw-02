@@ -1,28 +1,47 @@
 import { Db, MongoClient } from "mongodb";
-import { SETTINGS } from "../settings/config";
-import { initCollections } from "./collection";
 
-export let client: MongoClient;
+export class MongoDatabase {
+  private readonly client: MongoClient;
+  private db: Db | null = null;
 
-export async function runDB(url: string) {
-  client = new MongoClient(url);
-  const db: Db = client.db(SETTINGS.DB_NAME);
+  constructor(
+    url: string,
+    private readonly databaseName: string,
+  ) {
+    this.client = new MongoClient(url);
+  }
 
-  initCollections(db);
+  async connect(): Promise<void> {
+    if (this.db) {
+      return;
+    }
 
-  try {
-    await client.connect();
+    await this.client.connect();
+
+    const db = this.client.db(this.databaseName);
     await db.command({ ping: 1 });
-    console.log("✅ Connected to the database");
-  } catch (e) {
-    await client.close();
-    throw new Error(`❌ Database not connected: ${e}`);
-  }
-}
 
-export async function stopDb() {
-  if (!client) {
-    throw new Error(`❌ No active client`);
+    this.db = db;
   }
-  await client.close();
+
+  getDb(): Db {
+    if (!this.db) {
+      throw new Error("Database is not connected");
+    }
+
+    return this.db;
+  }
+
+  getClient() {
+    return this.client;
+  }
+
+  async close() {
+    if (!this.db) {
+      return;
+    }
+
+    await this.client.close();
+    this.db = null;
+  }
 }

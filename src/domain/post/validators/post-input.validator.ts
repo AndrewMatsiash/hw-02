@@ -7,7 +7,7 @@
 // blogId*	string
 
 import { body } from "express-validator";
-import { blogsRepository } from "../../blog/blog.repository";
+import { BlogsRepository } from "../../blog/blog.repository";
 
 export const titleValidation = body("title")
   .isString()
@@ -30,7 +30,7 @@ export const contentValidation = body("content")
   .isLength({ min: 1, max: 1000 })
   .withMessage("content length must be 1–1000");
 
-export const blogIdValidation = body("blogId")
+export const createBlogIdValidation = (blogsRepository: BlogsRepository) => body("blogId")
   .isString()
   .withMessage("blogId must be a string")
   .trim()

@@ -1,41 +1,46 @@
-import { postsRepository } from "../post/post.repository";
-import { blogsRepository } from "./blog.repository";
+import { PostsRepository } from "../post/post.repository";
+import { BlogsRepository } from "./blog.repository";
 import { BlogInputModel } from "./dto/blog.input.dto";
 
-export const blogsService = {
-  getAll: async () => {
-    const blogs = await blogsRepository.getAll();
+export class BlogsService {
+  constructor(
+    private readonly blogsRepository: BlogsRepository,
+    private readonly postsRepository: PostsRepository,
+  ) {}
+
+  async getAll() {
+    const blogs = await this.blogsRepository.getAll();
     return blogs;
-  },
+  }
 
-  getById: async (id: string) => {
-    const blog = await blogsRepository.getById(id);
+  async getById(id: string) {
+    const blog = await this.blogsRepository.getById(id);
     return blog;
-  },
+  }
 
-  create: async (body: BlogInputModel) => {
-    const newBlog = await blogsRepository.create(body);
+  async create(body: BlogInputModel) {
+    const newBlog = await this.blogsRepository.create(body);
     return newBlog;
-  },
+  }
 
-  update: async (id: string, body: BlogInputModel) => {
-    const updatedBlog = await blogsRepository.update(id, body);
+  async update(id: string, body: BlogInputModel) {
+    const updatedBlog = await this.blogsRepository.update(id, body);
 
     if (updatedBlog) {
-      await postsRepository.updateBlogName(updatedBlog.id, updatedBlog.name);
+      await this.postsRepository.updateBlogName(updatedBlog.id, updatedBlog.name);
     }
 
     return updatedBlog;
-  },
+  }
 
-  remove: async (id: string) => {
-    const deletedBlog = await blogsRepository.remove(id);
+  async remove(id: string) {
+    const deletedBlog = await this.blogsRepository.remove(id);
 
     // a post can't exist without its blog
     if (deletedBlog) {
-      await postsRepository.removeByBlogId(deletedBlog.id);
+      await this.postsRepository.removeByBlogId(deletedBlog.id);
     }
 
     return deletedBlog;
-  },
-};
+  }
+}

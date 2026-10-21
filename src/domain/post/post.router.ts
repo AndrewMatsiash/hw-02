@@ -1,13 +1,20 @@
 import { Router } from "express";
 import { basicAuthGuard } from "../../core/middlewares/auth/basic-auth.guard";
 import { inputValidationResultMiddleware } from "../../core/middlewares/validation/input-validation-result.middleware";
-import { postsController } from "./post.controller";
-import { createPostValidation } from "./validators/create.validator";
-import { updatePostValidation } from "./validators/update.validator";
+import { PostsController } from "./post.controller";
+import { createCreatePostValidation } from "./validators/create.validator";
+import { createUpdatePostValidation } from "./validators/update.validator";
+import { BlogsRepository } from "../blog/blog.repository";
 
-export const postsRouter = Router();
+export const createPostsRouter = (
+  postsController: PostsController,
+  blogsRepository: BlogsRepository,
+) => {
+  const postsRouter = Router();
+  const createPostValidation = createCreatePostValidation(blogsRepository);
+  const updatePostValidation = createUpdatePostValidation(blogsRepository);
 
-postsRouter
+  postsRouter
   .get("/", postsController.getAll)
   .get("/:id", postsController.getById)
   .post(
@@ -24,4 +31,7 @@ postsRouter
     inputValidationResultMiddleware,
     postsController.update,
   )
-  .delete("/:id", basicAuthGuard, postsController.remove);
+    .delete("/:id", basicAuthGuard, postsController.remove);
+
+  return postsRouter;
+};
