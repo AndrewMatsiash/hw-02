@@ -21,8 +21,10 @@ export class BlogsRepository {
       websiteUrl: body.websiteUrl,
     };
 
+    const blogView = { ...dbBlogRecord };
+
     await this.blogs.insertOne(dbBlogRecord);
-    return { ...dbBlogRecord };
+    return blogView;
   }
 
   async update(id: string, data: BlogInputModel) {

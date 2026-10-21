@@ -24,9 +24,10 @@ export class PostsRepository {
       blogId,
       blogName,
     };
+    const postView = { ...newPost };
 
     await this.posts.insertOne(newPost);
-    return newPost;
+    return postView;
   }
 
   async update({
