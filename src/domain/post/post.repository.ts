@@ -18,6 +18,7 @@ export class PostsRepository {
 
     const newPost: PostViewModel = {
       id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
       title,
       shortDescription,
       content,

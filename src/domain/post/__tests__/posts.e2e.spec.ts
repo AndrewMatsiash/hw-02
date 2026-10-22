@@ -56,6 +56,7 @@ describe("/posts", () => {
     it("returns 201 and the created post with blogName of its blog", () => {
       expect(post).toEqual({
         id: expect.any(String),
+        createdAt: expect.any(String),
         ...validInput,
         blogName: blog.name,
       });
@@ -80,6 +81,7 @@ describe("/posts", () => {
       });
       expect(res.body).toEqual({
         id: expect.any(String),
+        createdAt: expect.any(String),
         ...validInput,
         blogName: blog.name,
       });
@@ -92,9 +94,8 @@ describe("/posts", () => {
       const input = { ...validInput, title: "Updated" };
       await updatePost(post.id, input).expect(HTTP_STATUSES.NO_CONTENT);
       await api.get(postUrl(post.id)).expect(HTTP_STATUSES.OK, {
-        id: post.id,
+        ...post,
         ...input,
-        blogName: blog.name,
       });
     });
 

@@ -73,8 +73,13 @@ describe("/blogs", () => {
   });
 
   describe("POST /blogs", () => {
-    it("returns 201 and the created blog with a string id", () => {
-      expect(blog).toEqual({ id: expect.any(String), ...validInput });
+    it("returns 201 and the created blog with server fields", () => {
+      expect(blog).toEqual({
+        id: expect.any(String),
+        createdAt: expect.any(String),
+        isMembership: false,
+        ...validInput,
+      });
     });
 
     it("assigns unique ids", async () => {
@@ -93,7 +98,12 @@ describe("/blogs", () => {
         id: blog.id,
         extra: true,
       } as BlogInputModel);
-      expect(res.body).toEqual({ id: expect.any(String), ...otherInput });
+      expect(res.body).toEqual({
+        id: expect.any(String),
+        createdAt: expect.any(String),
+        isMembership: false,
+        ...otherInput,
+      });
       expect(res.body.id).not.toBe(blog.id);
     });
   });
@@ -103,12 +113,12 @@ describe("/blogs", () => {
       await updateBlog(blog.id, otherInput).expect(HTTP_STATUSES.NO_CONTENT);
       await api
         .get(blogUrl(blog.id))
-        .expect(HTTP_STATUSES.OK, { id: blog.id, ...otherInput });
+        .expect(HTTP_STATUSES.OK, { ...blog, ...otherInput });
     });
 
     it("ignores client id and unknown fields", async () => {
       await updateBlog(blog.id, { ...otherInput, id: UNKNOWN_ID, extra: true });
-      expect(await getBlogs()).toEqual([{ id: blog.id, ...otherInput }]);
+      expect(await getBlogs()).toEqual([{ ...blog, ...otherInput }]);
     });
 
     it("returns 404 for an unknown id", async () => {

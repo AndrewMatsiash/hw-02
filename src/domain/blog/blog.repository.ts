@@ -16,9 +16,11 @@ export class BlogsRepository {
   async create(body: BlogInputModel) {
     const dbBlogRecord: BlogViewModel = {
       id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
       name: body.name,
       description: body.description,
       websiteUrl: body.websiteUrl,
+      isMembership: false,
     };
 
     const blogView = { ...dbBlogRecord };
